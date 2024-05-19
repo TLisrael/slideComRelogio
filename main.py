@@ -43,19 +43,30 @@ class SlideShowApp(tk.Tk):
         self.news_index = 0
 
         self.update_time()
-        threading.Thread(target=self.update_dollar_rate).start()
-        threading.Thread(target=self.update_news).start()
+        self.after(1000, self.update_news)
+        self.after(1000, self.update_dollar_rate)
         self.show_slide()
+
         self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
         self.bind('<F11>', lambda e: self.attributes('-fullscreen', True))
+        self.bind('<Configure>', lambda e: self.resize_slide())
 
     def show_slide(self):
-        img = Image.open(self.slides[self.current_slide])
-        img = img.resize((800, 500), Image.LANCZOS)
-        self.img = ImageTk.PhotoImage(img)
-        self.slide_label.config(image=self.img)
+        self.display_slide(self.slides[self.current_slide])
         self.current_slide = (self.current_slide + 1) % len(self.slides)
         self.after(10000, self.show_slide)
+
+    def display_slide(self, slide_path):
+        img = Image.open(slide_path)
+        window_width = self.winfo_width()
+        window_height = self.winfo_height() - 100
+        if window_width > 0 and window_height > 0:
+            img = img.resize((window_width, window_height), Image.LANCZOS)
+            self.img = ImageTk.PhotoImage(img)
+            self.slide_label.config(image=self.img)
+
+    def resize_slide(self):
+        self.display_slide(self.slides[self.current_slide])
 
     def update_time(self):
         now = datetime.now().strftime("%d/%m/%Y %H:%M")
@@ -63,15 +74,17 @@ class SlideShowApp(tk.Tk):
         self.after(1000, self.update_time)
 
     def update_news(self):
-        try:
-            response = requests.get(f'https://newsapi.org/v2/top-headlines?country=br&apiKey={api_key}')
-            data = response.json()
-            self.news_items = [article["title"] for article in data["articles"]]
-            self.news_index = 0
-            self.scroll_news()
-        except Exception as e:
-            self.news_canvas.itemconfig(self.news_canvas_text, text="Falha ao carregar notícias")
-        time.sleep(160)
+        def fetch_news():
+            try:
+                response = requests.get(f'https://newsapi.org/v2/top-headlines?country=br&apiKey={api_key}')
+                data = response.json()
+                self.news_items = [article["title"] for article in data["articles"]]
+                self.news_index = 0
+                self.scroll_news()
+            except Exception as e:
+                self.news_canvas.itemconfig(self.news_canvas_text, text="Falha ao carregar notícias")
+            time.sleep(160)
+        threading.Thread(target=fetch_news).start()
 
     def scroll_news(self):
         if self.news_items:
@@ -86,14 +99,16 @@ class SlideShowApp(tk.Tk):
             self.news_canvas.after(50, self.scroll_news)
 
     def update_dollar_rate(self):
-        try:
-            response = requests.get("https://api.exchangerate-api.com/v4/latest/USD")
-            data = response.json()
-            brl_rate = data["rates"]["BRL"]
-            self.dollar_label.config(text=f"USD to BRL: R${brl_rate:.2f}")
-        except Exception as e:
-            self.dollar_label.config(text="Falha ao obter informações sobre o dólar.")
-        time.sleep(3600)
+        def fetch_dolar_rate():
+            try:
+                response = requests.get("https://api.exchangerate-api.com/v4/latest/USD")
+                data = response.json()
+                brl_rate = data["rates"]["BRL"]
+                self.dollar_label.config(text=f"USD to BRL: R${brl_rate:.2f}")
+            except Exception as e:
+                self.dollar_label.config(text="Falha ao obter informações sobre o dólar.")
+            time.sleep(3600)
+        threading.Thread(target=fetch_dolar_rate).start()
 
 
 if __name__ == "__main__":
