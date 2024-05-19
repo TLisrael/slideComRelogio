@@ -8,16 +8,21 @@ from datetime import datetime
 import threading
 import time
 
+
+# Add dolar
+# diminuir fonte das noticias
+# ajustar imagens e permitir que o programa fique em full screen
 load_dotenv()
 api_key = os.getenv('API_KEY')
+
+
 class SlideShowApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Wood PLC Info")
+        self.title("Painel Slides")
         self.geometry("800x600")
 
-        self.slides = ["WOOD-PLC-.jpg", "wood.jpg", "WOOD-PLC-.jpg", "wood.jpg", "WOOD-PLC-.jpg", "wood.jpg",
-                       "WOOD-PLC-.jpg", "wood.jpg"]
+        self.slides = ["img-1.jpg", "img-2.jpg", "img-3.jpg"]
         self.current_slide = 0
 
         self.slide_label = tk.Label(self)
@@ -36,6 +41,10 @@ class SlideShowApp(tk.Tk):
         self.news_canvas.pack(fill=tk.X, padx=20)
         self.news_canvas_text = self.news_canvas.create_text(0, 15, text="", anchor="w", fill="white",
                                                              font=("Helvetica", 16))
+
+        self.news_items = []
+        self.news_index = 0
+
         self.update_time()
         self.update_news()
         self.show_slide()
@@ -59,9 +68,22 @@ class SlideShowApp(tk.Tk):
             data = response.json()
             self.news_items = [article["title"] for article in data["articles"]]
             self.news_index = 0
+            self.scroll_news()
         except Exception as e:
-            self.news_canvas.itemconfig(self.news_canvas_text, text="Falha ao carregar noticias")
-        self.after(180000, self.update_news)
+            self.news_canvas.itemconfig(self.news_canvas_text, text="Falha ao carregar notícias")
+        self.after(160000, self.update_news)
+
+    def scroll_news(self):
+        if self.news_items:
+            current_text = "  /  ".join(self.news_items)
+            self.news_canvas.itemconfig(self.news_canvas_text, text=current_text)
+            bbox = self.news_canvas.bbox(self.news_canvas_text)
+            if bbox[2] < 0:
+                self.news_index = (self.news_index + 1) % len(self.news_items)
+                self.news_canvas.coords(self.news_canvas_text, 800, 15)
+            else:
+                self.news_canvas.move(self.news_canvas_text, -2, 0)
+            self.news_canvas.after(50, self.scroll_news)
 
 
 if __name__ == "__main__":
