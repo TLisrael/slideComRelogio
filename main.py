@@ -33,7 +33,7 @@ class SlideShowApp(tk.Tk):
         self.news_canvas.pack(fill=tk.X, padx=20)
         self.news_canvas_text = self.news_canvas.create_text(0, 15, text="", anchor="w", fill="white",
                                                              font=("Helvetica", 16))
-
+        self.update_time()
         self.show_slide()
 
     def show_slide(self):
