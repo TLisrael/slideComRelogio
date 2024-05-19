@@ -8,7 +8,6 @@ from datetime import datetime
 import threading
 import time
 
-
 # Add dolar
 # diminuir fonte das noticias
 # ajustar imagens e permitir que o programa fique em full screen
@@ -34,18 +33,19 @@ class SlideShowApp(tk.Tk):
         self.time_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 12))
         self.time_label.pack(side=tk.RIGHT, padx=20, pady=10)
 
-        self.dollar_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 16))
+        self.dollar_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 12))
         self.dollar_label.pack(side=tk.LEFT, padx=20, pady=10)
 
         self.news_canvas = tk.Canvas(self.info_bar, bg='#282828', height=30, highlightthickness=0)
-        self.news_canvas.pack(fill=tk.X, padx=20)
+        self.news_canvas.pack(fill=tk.X, padx=30,  pady=10)
         self.news_canvas_text = self.news_canvas.create_text(0, 15, text="", anchor="w", fill="white",
-                                                             font=("Helvetica", 16))
+                                                             font=("Helvetica", 12))
 
         self.news_items = []
         self.news_index = 0
 
         self.update_time()
+        self.update_dollar_rate()
         self.update_news()
         self.show_slide()
 
@@ -84,6 +84,16 @@ class SlideShowApp(tk.Tk):
             else:
                 self.news_canvas.move(self.news_canvas_text, -2, 0)
             self.news_canvas.after(50, self.scroll_news)
+
+    def update_dollar_rate(self):
+        try:
+            response = requests.get("https://api.exchangerate-api.com/v4/latest/USD")
+            data = response.json()
+            brl_rate = data["rates"]["BRL"]
+            self.dollar_label.config(text=f"USD to BRL: R${brl_rate:.2f}")
+        except Exception as e:
+            self.dollar_label.config(text="Falha ao obter informações sobre o dólar.")
+        self.after(60000, self.update_dollar_rate)
 
 
 if __name__ == "__main__":
