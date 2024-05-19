@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
@@ -6,7 +8,8 @@ from datetime import datetime
 import threading
 import time
 
-
+load_dotenv()
+api_key = os.getenv('API_KEY')
 class SlideShowApp(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -23,7 +26,7 @@ class SlideShowApp(tk.Tk):
         self.info_bar = tk.Frame(self, height=100, bg='#282828')
         self.info_bar.pack(fill=tk.X, side=tk.BOTTOM)
 
-        self.time_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 16))
+        self.time_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 12))
         self.time_label.pack(side=tk.RIGHT, padx=20, pady=10)
 
         self.dollar_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 16))
@@ -34,6 +37,7 @@ class SlideShowApp(tk.Tk):
         self.news_canvas_text = self.news_canvas.create_text(0, 15, text="", anchor="w", fill="white",
                                                              font=("Helvetica", 16))
         self.update_time()
+        self.update_news()
         self.show_slide()
 
     def show_slide(self):
@@ -48,6 +52,16 @@ class SlideShowApp(tk.Tk):
         now = datetime.now().strftime("%d/%m/%Y %H:%M")
         self.time_label.config(text=now)
         self.after(1000, self.update_time)
+
+    def update_news(self):
+        try:
+            response = requests.get(f'https://newsapi.org/v2/top-headlines?country=br&apiKey={api_key}')
+            data = response.json()
+            self.news_items = [article["title"] for article in data["articles"]]
+            self.news_index = 0
+        except Exception as e:
+            self.news_canvas.itemconfig(self.news_canvas_text, text="Falha ao carregar noticias")
+        self.after(180000, self.update_news)
 
 
 if __name__ == "__main__":
