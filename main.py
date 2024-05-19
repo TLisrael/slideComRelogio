@@ -1,4 +1,6 @@
 import os
+import time
+
 from dotenv import load_dotenv
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -6,8 +8,6 @@ import requests
 from datetime import datetime
 import threading
 
-# Implementar o threading para evitar travamentos em atualizações
-# ajustar imagens e permitir que o programa fique em full screen
 load_dotenv()
 api_key = os.getenv('API_KEY')
 
@@ -17,6 +17,7 @@ class SlideShowApp(tk.Tk):
         super().__init__()
         self.title("Painel Slides")
         self.geometry("800x600")
+        self.attributes("-fullscreen", True)
 
         self.slides = ["img-1.jpg", "img-2.jpg", "img-3.jpg"]
         self.current_slide = 0
@@ -34,7 +35,7 @@ class SlideShowApp(tk.Tk):
         self.dollar_label.pack(side=tk.LEFT, padx=20, pady=10)
 
         self.news_canvas = tk.Canvas(self.info_bar, bg='#282828', height=30, highlightthickness=0)
-        self.news_canvas.pack(fill=tk.X, padx=30,  pady=10)
+        self.news_canvas.pack(fill=tk.X, padx=30, pady=10)
         self.news_canvas_text = self.news_canvas.create_text(0, 15, text="", anchor="w", fill="white",
                                                              font=("Helvetica", 12))
 
@@ -42,9 +43,11 @@ class SlideShowApp(tk.Tk):
         self.news_index = 0
 
         self.update_time()
-        self.update_dollar_rate()
-        self.update_news()
+        threading.Thread(target=self.update_dollar_rate).start()
+        threading.Thread(target=self.update_news).start()
         self.show_slide()
+        self.bind('<Escape>', lambda e: self.attributes('-fullscreen', False))
+        self.bind('<F11>', lambda e: self.attributes('-fullscreen', True))
 
     def show_slide(self):
         img = Image.open(self.slides[self.current_slide])
@@ -68,7 +71,7 @@ class SlideShowApp(tk.Tk):
             self.scroll_news()
         except Exception as e:
             self.news_canvas.itemconfig(self.news_canvas_text, text="Falha ao carregar notícias")
-        self.after(160000, self.update_news)
+        time.sleep(160)
 
     def scroll_news(self):
         if self.news_items:
@@ -90,7 +93,7 @@ class SlideShowApp(tk.Tk):
             self.dollar_label.config(text=f"USD to BRL: R${brl_rate:.2f}")
         except Exception as e:
             self.dollar_label.config(text="Falha ao obter informações sobre o dólar.")
-        self.after(60000, self.update_dollar_rate)
+        time.sleep(3600)
 
 
 if __name__ == "__main__":
