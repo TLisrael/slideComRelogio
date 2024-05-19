@@ -1,15 +1,12 @@
 import os
 from dotenv import load_dotenv
 import tkinter as tk
-from tkinter import ttk
 from PIL import Image, ImageTk
 import requests
 from datetime import datetime
 import threading
-import time
 
-# Add dolar
-# diminuir fonte das noticias
+# Implementar o threading para evitar travamentos em atualizações
 # ajustar imagens e permitir que o programa fique em full screen
 load_dotenv()
 api_key = os.getenv('API_KEY')
