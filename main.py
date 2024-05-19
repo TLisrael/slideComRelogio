@@ -1,6 +1,5 @@
 import os
 import time
-
 from dotenv import load_dotenv
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -25,19 +24,19 @@ class SlideShowApp(tk.Tk):
         self.slide_label = tk.Label(self)
         self.slide_label.pack(expand=True, fill=tk.BOTH)
 
-        self.info_bar = tk.Frame(self, height=100, bg='#282828')
-        self.info_bar.pack(fill=tk.X, side=tk.BOTTOM)
+        self.info_bar = tk.Frame(self, height=100, bg='#333333')
+        self.info_bar.pack(fill=tk.X, side=tk.BOTTOM, padx=10, pady=10)
 
-        self.time_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 12))
+        self.time_label = tk.Label(self.info_bar, text="", bg='#333333', fg='white', font=("Helvetica", 14, "bold"))
         self.time_label.pack(side=tk.RIGHT, padx=20, pady=10)
 
-        self.dollar_label = tk.Label(self.info_bar, text="", bg='#282828', fg='white', font=("Helvetica", 12))
+        self.dollar_label = tk.Label(self.info_bar, text="", bg='#333333', fg='white', font=("Helvetica", 14, "bold"))
         self.dollar_label.pack(side=tk.LEFT, padx=20, pady=10)
 
-        self.news_canvas = tk.Canvas(self.info_bar, bg='#282828', height=30, highlightthickness=0)
-        self.news_canvas.pack(fill=tk.X, padx=30, pady=10)
+        self.news_canvas = tk.Canvas(self.info_bar, bg='#333333', height=30, highlightthickness=0)
+        self.news_canvas.pack(fill=tk.X, padx=20, pady=5)
         self.news_canvas_text = self.news_canvas.create_text(0, 15, text="", anchor="w", fill="white",
-                                                             font=("Helvetica", 12))
+                                                             font=("Helvetica", 14))
 
         self.news_items = []
         self.news_index = 0
