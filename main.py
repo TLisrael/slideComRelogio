@@ -44,6 +44,11 @@ class SlideShowApp(tk.Tk):
         self.current_slide = (self.current_slide + 1) % len(self.slides)
         self.after(10000, self.show_slide)
 
+    def update_time(self):
+        now = datetime.now().strftime("%d/%m-%Y %H:%M")
+        self.time_label.config(text=now)
+        self.after(1000, self.update_time)
+
 
 if __name__ == "__main__":
     app = SlideShowApp()
